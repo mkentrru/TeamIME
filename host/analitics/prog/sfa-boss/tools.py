@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pyts.approximation import DiscreteFourierTransform
+from pyts.approximation import SymbolicFourierApproximation as SFA
 
 def die(msg):
     print(msg)
@@ -12,26 +12,28 @@ class Configuration:
         self.time_series_length = time_series_length
         self.time_series_size = time_series_size
 
-class SFA:
+class SFAAlg:
     transformed = []
-    pd = []
+    apml = []
+    phase = []
 
     def __init__(self, ds, pos, length, coefs_count):
-        self.ods = ds
+        self.ods = ds.copy()
         self.cut_pos = pos
         self.cut_length = length
         self.coefs_count = coefs_count
         # self.ods_cut = ds[pos:len:1].copy()
 
     def calculate_fourier_coefficients(self):
-        X = (self.ods[self.cut_pos: self.cut_pos + self.cut_length: 1],
-             range(0, self.cut_length))
-        dft = DiscreteFourierTransform(
-            n_coefs=self.coefs_count, norm_mean=False,
-                                       norm_std=False)
-        self.transformed = dft.fit_transform(X)[0]
-        print(self.transformed)
-        self.pd = self.transformed
+        sig = self.ods[self.cut_pos: self.cut_pos + self.cut_length: 1]
+        c = np.fft.rfft(sig)
+        self.apml = c.real
+        self.phase = c.imag
+
+
+    def approximation(self):
+        help(type(self))
+
 
 
 class Data:
@@ -65,11 +67,21 @@ class Data:
 
     def prepare_dataset(self, type=None):
         if type is None:
-            self.pd = self.ds
-        if type is 'n':
+            self.pd = self.ds.copy()
+        if type == 'n':
             self.pd = self.ds / np.linalg.norm(self.ds)
             # self.pds = pp.normalize(self.ds)
+        if type == 'sfa-p':
+            self.pd = self.ds.copy()
+            m = 20
+            d = 3
 
+            for i in range(np.shape(self.pd)[0]):
+                if abs(m - self.pd[i]) < d:
+                    self.pd[i] = 0
+                else:
+                    self.pd[i] -= 20
+            self.pd /= 30
 
 def display_data(data_rows, b=None, e=None):
     xmin = 0
@@ -104,8 +116,8 @@ def display_data(data_rows, b=None, e=None):
     plt.show()
 
 
-def display_data_in_rows(data_rows, length, b, f):
-    plot_config = 211
+def display_data_in_rows(data_rows, length, b):
+    plot_config = 111
     plt.figure(figsize=(9, 9))
     i = 0
     for set in data_rows:
@@ -113,6 +125,6 @@ def display_data_in_rows(data_rows, length, b, f):
         plot_config += 1
         plt.plot(
             range(b[i], b[i] + length[i]),
-            set.pd[b[i]: b[i] + length[i]: 1], f[i], linewidth=1.0)
+            set[b[i]: b[i] + length[i]: 1], linewidth=1.0)
         i += 1
     plt.show()
