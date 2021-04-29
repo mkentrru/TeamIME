@@ -43,10 +43,23 @@ class SFAAlg:
         print(len(self.approx.vocabulary_))
 
     def display_bars(self):
+        plt.figure(figsize=(6, 9))
+        plt.subplot(111)
         a = self.transformed.toarray()
-        # print()
-        plt.bar(range(np.shape(a)[1]),
-                a)
+        column_width = 2
+        sub_column_count = np.shape(a)[0]
+        sub_column_fix = column_width / sub_column_count
+        column_count = np.shape(a)[1]
+
+        x = np.arange(0, (column_width + 0.5) * column_count, column_width + 0.5)
+
+        sub_coumn_index = 0
+        for r in a:
+            plt.bar(x + sub_coumn_index * sub_column_fix, r)
+            sub_coumn_index += 1
+
+        # plt.bar(,
+        #         a)
 
 
 class Data:

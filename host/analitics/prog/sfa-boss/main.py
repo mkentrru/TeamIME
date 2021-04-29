@@ -20,10 +20,10 @@ if __name__ == '__main__':
     # ds_t.prepare_dataset()
     #
     coefficients_count = 30
-    cut_position = 0
+    cut_position = 1000
     # row_length = 4500
     time_series_length = 500
-    time_series_count = 5
+    time_series_count = 3
     row_length = time_series_length * time_series_count
     sfa_p = t.SFAAlg(ds_v.pd, coefficients_count)
 
@@ -35,6 +35,7 @@ if __name__ == '__main__':
                                   cut_position,
                                   time_series_length,
                                   time_series_count)
+
     sfa_p.display_bars()
 
     ds_v.plots_show()
