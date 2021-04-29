@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pyts.approximation import SymbolicFourierApproximation as SFA
+import pyts.approximation as approximation
+from pyts.datasets import load_gunpoint
+import pyts.transformation as transformation
 
 def die(msg):
     print(msg)
@@ -12,28 +14,39 @@ class Configuration:
         self.time_series_length = time_series_length
         self.time_series_size = time_series_size
 
+
 class SFAAlg:
     transformed = []
-    apml = []
-    phase = []
 
-    def __init__(self, ds, pos, length, coefs_count):
+    def __init__(self, ds, coefficients_count):
         self.ods = ds.copy()
-        self.cut_pos = pos
-        self.cut_length = length
-        self.coefs_count = coefs_count
-        # self.ods_cut = ds[pos:len:1].copy()
+        self.tran = approximation.DiscreteFourierTransform(
+            n_coefs=coefficients_count, drop_sum=True)
+        self.approx = transformation.BOSS(
+            drop_sum=True, n_bins=4, word_size=3
+        )
 
-    def calculate_fourier_coefficients(self):
-        sig = self.ods[self.cut_pos: self.cut_pos + self.cut_length: 1]
-        c = np.fft.rfft(sig)
-        self.apml = c.real
-        self.phase = c.imag
+    # def calculate_fourier_coefficients(self):
+    #     sig = self.ods[self.cut_pos: self.cut_pos + self.cut_length: 1]
+    #     c = np.fft.rfft(sig)
+    #     self.apml = c.real
+    #     self.phase = c.imag
 
+    def transform(self, cut_position, row_length, time_series_length, time_series_count):
+        X = self.ods[cut_position: cut_position + row_length].\
+            reshape(
+            time_series_count,
+            time_series_length)
+        # self.transformed = self.tran.fit_transform(X)
+        self.transformed = self.approx.fit_transform(X)
+        print(sorted(self.approx.vocabulary_.values()))
+        print(len(self.approx.vocabulary_))
 
-    def approximation(self):
-        help(type(self))
-
+    def display_bars(self):
+        a = self.transformed.toarray()
+        # print()
+        plt.bar(range(np.shape(a)[1]),
+                a)
 
 
 class Data:
@@ -73,15 +86,19 @@ class Data:
             # self.pds = pp.normalize(self.ds)
         if type == 'sfa-p':
             self.pd = self.ds.copy()
-            m = 20
-            d = 3
+            m = 32
+            d = 10
 
             for i in range(np.shape(self.pd)[0]):
                 if abs(m - self.pd[i]) < d:
                     self.pd[i] = 0
                 else:
-                    self.pd[i] -= 20
-            self.pd /= 30
+                    self.pd[i] -= m
+            self.pd /= 130
+
+    def plots_show(self):
+        plt.show()
+
 
 def display_data(data_rows, b=None, e=None):
     xmin = 0
@@ -117,7 +134,7 @@ def display_data(data_rows, b=None, e=None):
 
 
 def display_data_in_rows(data_rows, length, b):
-    plot_config = 111
+    plot_config = len(data_rows) * 100 + 11
     plt.figure(figsize=(9, 9))
     i = 0
     for set in data_rows:
@@ -128,3 +145,17 @@ def display_data_in_rows(data_rows, length, b):
             set[b[i]: b[i] + length[i]: 1], linewidth=1.0)
         i += 1
     plt.show()
+
+
+def display_single_data_in_rows(ds, cut_pos, cut_length, cut_count):
+    plot_config = cut_count * 100 + 11
+    plt.figure(figsize=(9, 9))
+
+    for i in range(cut_count):
+        plt.subplot(plot_config)
+        plot_config += 1
+        plt.plot(
+            range(cut_pos, cut_pos + cut_length),
+            ds[cut_pos: cut_pos + cut_length: 1],
+            linewidth=1.0)
+        cut_pos += cut_length
