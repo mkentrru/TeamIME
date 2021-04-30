@@ -9,7 +9,6 @@ if __name__ == '__main__':
 
     # t.display_data([ds_v], 0, 5000)
 
-
     # ds_p = t.Data('../data/sets/r0/', 'p1.npy')
     # ds_t = t.Data('../data/sets/r0/', 't1.npy')
     #
@@ -18,14 +17,13 @@ if __name__ == '__main__':
     #
     # ds_t.load_dataset()
     # ds_t.prepare_dataset()
-    #
-    coefficients_count = 30
-    cut_position = 1000
-    # row_length = 4500
+
+    cut_position = 0
     time_series_length = 500
-    time_series_count = 3
+    time_series_count = 1
     row_length = time_series_length * time_series_count
-    sfa_p = t.SFAAlg(ds_v.pd, coefficients_count)
+
+    sfa_p = t.SFAAlg(ds_v.pd)
 
     sfa_p.transform(cut_position, row_length, time_series_length, time_series_count)
 
