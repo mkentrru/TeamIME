@@ -1,6 +1,7 @@
 import pyts.transformation as transformation
 import numpy as np
 
+
 class ClassifierPreprocessing:
 
 	def __init__(self, n_bins, word_size):
