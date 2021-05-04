@@ -1,6 +1,7 @@
 import numpy as np
 import tools as t
 import configuration as conf
+import statistics
 
 class SeriesBins:
     current_label = ord('a')
@@ -56,6 +57,60 @@ class SeriesPatterns:
         self.bins_row = arr
 
 
+def calculate_patterns(ds, length, step):
+    d = {}
+    for pattern_index in range(0, len(ds) - length, step):
+        key = ''
+        for c in range(0, length):
+            key += ds[pattern_index + c]
+
+        current_value = d.get(key, None)
+        if current_value is None:
+            new_value = 1
+        else:
+            new_value = current_value + 1
+        d.update({key: new_value})
+    print('Patterns appearance:')
+    for key, value in d.items():
+        print(key, value)
+
+
+def get_pattern_distances(ds, pattern):
+    pattern_length = len(pattern)
+    current_length = 0
+    X = []
+    for pos in range(len(ds) - pattern_length):
+        s = ''.join(ds[pos: pos + pattern_length])
+        current_length += 1
+        if s == pattern:
+            X.append(current_length)
+            current_length = 0
+    print('Pattern: \'', pattern, '\'')
+    print('Values: ', X)
+    return X
+
+
+def gather_in_range_info(ds, bottom, up):
+    print('\n', '[', bottom, ';', up, ']')
+    X = []
+    X_distances = []
+    X_distance = 0
+    for value in ds:
+        X_distance += 1
+        if bottom <= value <= up:
+            X.append(value)
+            X_distances.append(X_distance)
+            X_distance = 0
+    length = len(X)
+    data_mean = statistics.mean(X)
+    data_variance = statistics.variance(X, xbar=None)
+    print('Size: ', length)
+    # print('Values and offsets:\n', [X[i], X_distances[i] for i in range(len(X))])
+    # print('Values offsets:\t', X_distances)
+    t.print_list_in_columns([X, X_distances])
+
+    print('Mean: ', data_mean)
+    print('Variance: ', data_variance)
 
 
 pure_data = t.Data(conf.path, conf.data_set_type)
@@ -66,3 +121,19 @@ sp = SeriesPatterns(pure_data.ods['Voltage'])
 sp.gather_information()
 sp.create_bins(3, [12, 24, None])
 sp.apply_bins()
+
+ds_pos = 0
+ds_length = 10000
+
+calculate_patterns(sp.bins_row[ds_pos: ds_pos + ds_length], 3, 1)
+
+distances = get_pattern_distances(sp.bins_row[ds_pos: ds_pos + ds_length], 'aca')
+gather_in_range_info(distances, 0, 15)
+gather_in_range_info(distances, 16, 24)
+gather_in_range_info(distances, 25, 55)
+gather_in_range_info(distances, 56, 120)
+
+t.plot_series(distances, 0, len(distances), 1)
+
+# t.show_all_plots()
+
