@@ -76,9 +76,7 @@ def show_all_plots():
 def print_list_in_columns(data):
     if not data:
         return
-    for values in data:
-        o = str(values)
-        print(o)
+    print(np.array(data).T)
 
 
 def parse_data(subdir='r2/', name='v'):

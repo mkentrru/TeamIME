@@ -78,6 +78,7 @@ def calculate_patterns(ds, length, step):
 def get_pattern_distances(ds, pattern):
     pattern_length = len(pattern)
     current_length = 0
+    approximated = []
     X = []
     for pos in range(len(ds) - pattern_length):
         s = ''.join(ds[pos: pos + pattern_length])
@@ -85,9 +86,12 @@ def get_pattern_distances(ds, pattern):
         if s == pattern:
             X.append(current_length)
             current_length = 0
+            approximated.append(1)
+        else:
+            approximated.append(0)
     print('Pattern: \'', pattern, '\'')
     print('Values: ', X)
-    return X
+    return X, approximated
 
 
 def gather_in_range_info(ds, bottom, up):
@@ -105,12 +109,16 @@ def gather_in_range_info(ds, bottom, up):
     data_mean = statistics.mean(X)
     data_variance = statistics.variance(X, xbar=None)
     print('Size: ', length)
-    # print('Values and offsets:\n', [X[i], X_distances[i] for i in range(len(X))])
-    # print('Values offsets:\t', X_distances)
-    t.print_list_in_columns([X, X_distances])
+    print('Values:\n', X)
+    print('Values offsets:\n', X_distances)
+    # t.print_list_in_columns([X, X_distances])
 
     print('Mean: ', data_mean)
     print('Variance: ', data_variance)
+
+# def get_periods_info(ds, length_start, length_end, length_diff, epsilon, pattern):
+
+
 
 
 pure_data = t.Data(conf.path, conf.data_set_type)
@@ -127,7 +135,8 @@ ds_length = 10000
 
 calculate_patterns(sp.bins_row[ds_pos: ds_pos + ds_length], 3, 1)
 
-distances = get_pattern_distances(sp.bins_row[ds_pos: ds_pos + ds_length], 'aca')
+distances, pattern_appearance = \
+    get_pattern_distances(sp.bins_row[ds_pos: ds_pos + ds_length], 'aca')
 gather_in_range_info(distances, 0, 15)
 gather_in_range_info(distances, 16, 24)
 gather_in_range_info(distances, 25, 55)
