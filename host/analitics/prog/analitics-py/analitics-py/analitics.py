@@ -3,6 +3,7 @@ import tools as t
 import configuration as conf
 import statistics
 
+
 class SeriesBins:
     current_label = ord('a')
 
@@ -100,49 +101,108 @@ def gather_in_range_info(ds, bottom, up):
     X_distances = []
     X_distance = 0
     for value in ds:
-        X_distance += 1
+        X_distance += value
         if bottom <= value <= up:
             X.append(value)
             X_distances.append(X_distance)
             X_distance = 0
     length = len(X)
     data_mean = statistics.mean(X)
-    data_variance = statistics.variance(X, xbar=None)
+    # data_variance = statistics.variance(X, xbar=None)
     print('Size: ', length)
     print('Values:\n', X)
     print('Values offsets:\n', X_distances)
     # t.print_list_in_columns([X, X_distances])
 
     print('Mean: ', data_mean)
-    print('Variance: ', data_variance)
+    # print('Variance: ', data_variance)
 
 # def get_periods_info(ds, length_start, length_end, length_diff, epsilon, pattern):
 
 
+def count_distribution(ds, index_range, step=1):
+    lower, upper = np.min(ds), np.max(ds)
+    # if lower < 0:
+    #     index_range = int((int(upper-lower) + 1) / step)
+    # else:
+    # index_range = int((upper + 1) / step)
+
+    x = np.zeros(index_range)
+    for value in ds:
+        value_index = int(value / step)
+        x[value_index] += 1
+    return x
 
 
-pure_data = t.Data(conf.path, conf.data_set_type)
-pure_data.add_dataset_from_file('r3/', 'v', 'csv')
+def calculate_windows_average(ds, length):
+    x = []
+    for pos in range(len(ds) - length):
+        av = np.average(ds[pos:pos + length])
+        x.append(av)
+    return x
 
 
-sp = SeriesPatterns(pure_data.ods['Voltage'])
-sp.gather_information()
-sp.create_bins(3, [12, 24, None])
-sp.apply_bins()
+def get_information(ds):
+    values_range = ds.max - ds.min
+    print(values_range)
 
-ds_pos = 0
-ds_length = 10000
+# old
+# # pure_data = t.Data(conf.path, conf.data_set_type)
+# # pure_data.add_dataset_from_file('r1/', 'timeout', 'csv')
+# # pure_data.prepare_dataset()
+# #
+# # t.plot_series(pure_data.ods['Power'], 70, 450, 2)
 
-calculate_patterns(sp.bins_row[ds_pos: ds_pos + ds_length], 3, 1)
 
-distances, pattern_appearance = \
-    get_pattern_distances(sp.bins_row[ds_pos: ds_pos + ds_length], 'aca')
-gather_in_range_info(distances, 0, 15)
-gather_in_range_info(distances, 16, 24)
-gather_in_range_info(distances, 25, 55)
-gather_in_range_info(distances, 56, 120)
+# normal = t.Data(conf.path, conf.data_set_type)
+# normal.add_dataset_from_file('r1/', 'normal', 'csv')
+#
+# timeout = t.Data(conf.path, conf.data_set_type)
+# timeout.add_dataset_from_file('r1/', 'timeout', 'csv')
+#
+# attack = t.Data(conf.path, conf.data_set_type)
+# attack.add_dataset_from_file('r1/', 'attack', 'csv')
+#
+# windows_size = 20
+#
+#
+# windows_average = calculate_windows_average(timeout.ods['Power'], windows_size)
+# average_distribution = count_distribution(windows_average, 100)
+#
+# t.plot_series(windows_average, 0, 1000, 1)
+# t.plot_series(average_distribution, 0, len(average_distribution), 1)
+#
+# # t.plot_series(timeout.ods['Power'], 0, 1000, 1)
+#
+# windows_average = calculate_windows_average(attack.ods['Power'], windows_size)
+# average_distribution = count_distribution(windows_average, 100)
+#
+# t.plot_series(windows_average, 0, 1000, 1)
+# t.plot_series(average_distribution, 0, len(average_distribution), 1)
 
-t.plot_series(distances, 0, len(distances), 1)
+# t.plot_series(attack.ods['Power'], 0, 1000, 1)
 
-# t.show_all_plots()
+# # get_information(pure_data.pds)
+#
+#
+# # sp = SeriesPatterns(pure_data.ods['Voltage'])
+# # sp.gather_information()
+# # sp.create_bins(3, [30, 31, None])
+# # sp.apply_bins()
+# #
+# # ds_pos = 0
+# # ds_length = 10000
+# #
+# # calculate_patterns(sp.bins_row[ds_pos: ds_pos + ds_length], 3, 1)
+# #
+# # distances, pattern_appearance = \
+# #     get_pattern_distances(sp.bins_row[ds_pos: ds_pos + ds_length], 'aba')
+# # gather_in_range_info(distances, 0, 15)
+# # gather_in_range_info(distances, 19, 24)
+# # gather_in_range_info(distances, 25, 55)
+# # gather_in_range_info(distances, 56, 120)
+# #
+# # t.plot_series(distances, 0, len(distances), 1)
+#
+t.show_all_plots()
 

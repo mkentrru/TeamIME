@@ -37,10 +37,13 @@ class Data:
                 self.ods = np.append (self.ods, arr, axis=0)
         print(self.ods)
 
+    def prepare_dataset(self):
+        self.pds = np.array((self.ods['Temp'], self.ods['Power']))
+
 
 def plot_series(series, cuts_position, cuts_length, cuts_count):
     plot_config = cuts_count * 100 + 11
-    plt.figure(figsize=(8, 9))
+    plt.figure(figsize=(8, cuts_count * 3))
 
     for i in range(cuts_count):
         plt.subplot(plot_config)
@@ -79,7 +82,7 @@ def print_list_in_columns(data):
     print(np.array(data).T)
 
 
-def parse_data(subdir='r2/', name='v'):
+def parse_data(subdir, name, write=False):
     path = conf.path + subdir
     source_file = open(path + name + '.txt', "r")
     data_set_type = conf.data_set_type
@@ -91,12 +94,14 @@ def parse_data(subdir='r2/', name='v'):
         # time_value = time.strptime(string_values[0], '%H:%M:%S.%f')
         # timestamp = int(time.mktime(time_value))
         # print(timestamp)
-        arr.append((string_values[0], string_values[2][:-1]))
+        arr.append((string_values[0], string_values[2], string_values[3][:-1]))
+
+    # print(arr)
 
     data_set = np.array(arr, dtype=data_set_type)  # .T
 
-
-    np.savetxt(path + name + '.csv', data_set,
+    if write:
+        np.savetxt(path + name + '.csv', data_set,
                newline=conf.csv_newline, delimiter=conf.csv_delimiter,
                fmt=conf.csv_fmt)
 

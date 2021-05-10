@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>  
+		<title>HELLO NIGGER</title>  
+		<meta http-equiv=\"refresh\" content=\"2\">  
+		<style type=\"text/css\">    
+			.checkbox {      vertical-align:top;      margin:0 3px 0 0;      width:17px;      height:17px;    }    .checkbox + label {      cursor:pointer;    }    .checkbox:not(checked) {      position:absolute;      opacity:0;    }    .checkbox:not(checked) + label {      position:relative;      padding:0 0 0 60px;    }    .checkbox:not(checked) + label:before {      content:'';      position:absolute;      top:-4px;      left:0;      width:50px;      height:26px;      border-radius:13px;      background:#CDD1DA;      box-shadow:inset 0 2px 3px rgba(0,0,0,.2);    }    .checkbox:not(checked) + label:after {      content:'';      position:absolute;      top:-2px;      left:2px;      width:22px;      height:22px;      border-radius:10px;      background:#FFF;      box-shadow:0 2px 5px rgba(0,0,0,.3);      transition:all .2s;    }    .checkbox:checked + label:before {      background:#9FD468;    }    .checkbox:checked + label:after {      left:26px;    }  
+		</style> 
+		 <script type=\"text/javascript\">    
+		 	function openUrl(url) {      
+		 		var request = new XMLHttpRequest();     
+		 		request.open('GET', url, true);      
+		 		request.send(null);    
+		 	}  
+		 </script>
+		</head>
+		<body>  
+			<form>    
+				<h3>BLYADSKOE OPD</h3>    
+				<p>    WiFi mode: Access Point
+					<br/>    MQTT broker: not connected
+					<br/>    Heap free size: 40568 bytes
+					<br/>    Uptime: 5126 seconds
+				</p>    
+				<input type=\"checkbox\" class=\"checkbox\" id=\"relay\" onchange=\"openUrl('/switch?on=' + this.checked);\" />    
+				<label for=\"relay\">Relay</label>    
+				<p>    
+					<input type=\"button\" value=\"INPUT\" onclick=\"location.href='/wifi';\" />    
+					<input type=\"button\" value=\"MQTT Setup\" onclick=\"location.href='/mqtt';\" />    
+					<input type=\"button\" value=\"Relay Setup\" onclick=\"location.href='/relay';\" />   
+					<input type=\"button\" value=\"Reboot!\" onclick=\"if (confirm('Are you sure to reboot?')) location.href='/reboot';\" />  
+			</form>
+		</body>
+</html>
