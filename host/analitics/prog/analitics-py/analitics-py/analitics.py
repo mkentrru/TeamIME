@@ -19,42 +19,45 @@ class SeriesBins:
         if label is None:
             label = self.new_label()
         self.l.append((label, b, e))
+        # print((label, b, e))
 
 
-class SeriesPatterns:
-    appearance_counts = []
+class SeriesBinsPatterns:
     bins_row = []
+    appearance_counts = []
 
-    def __init__(self, ds):
+    def __init__(self, ds, endings):
         self.bins = SeriesBins()
         self.ds = ds
-        self.values = np.zeros(max(ds) + 1, dtype=np.int32)
-
-    def gather_information(self):
-        for value in self.ds:
-            self.values[value] += 1
-
-        value_index = 0
-        for count in self.values:
-            if count != 0:
-                self.appearance_counts.append((value_index, count))
-                print(' ', value_index, '\t', count)
-            value_index += 1
-        # print(self.appearance_counts)
-
-    def create_bins(self, count, endings):
-        for i in range(count):
+        for i in range(len(endings)):
             self.bins.append(label=None, e=endings[i])
+        self.appearance_counts = np.zeros(len(endings))
+
+    # def gather_information(self):
+    #     for value in self.ds:
+    #         self.values[value] += 1
+    #
+    #     value_index = 0
+    #     for count in self.values:
+    #         if count != 0:
+    #             self.appearance_counts.append((value_index, count))
+    #             print(' ', value_index, '\t', count)
+    #         value_index += 1
+    #     print(self.appearance_counts)
 
     def get_bin_label(self, value):
         for bin_node in self.bins.l:
             if bin_node[2] is None or value <= bin_node[2]:
                 return bin_node[0]
 
-    def apply_bins(self):
+    def apply_bins(self, step):
         arr = []
-        for value in self.ds:
-            arr.append(self.get_bin_label(value))
+        for value in range(0, len(self.ds), step): # self.ds:
+            bin_label = self.get_bin_label(self.ds[value])
+            arr.append(bin_label)
+            bin_index = ord(bin_label) - ord('a')
+            self.appearance_counts[bin_index] += 1
+
         self.bins_row = arr
 
 
@@ -120,7 +123,7 @@ def gather_in_range_info(ds, bottom, up):
 # def get_periods_info(ds, length_start, length_end, length_diff, epsilon, pattern):
 
 
-def count_distribution(ds, index_range, step=1):
+def count_distribution(ds, index_range, step=1, scale=1):
     lower, upper = np.min(ds), np.max(ds)
     # if lower < 0:
     #     index_range = int((int(upper-lower) + 1) / step)
@@ -129,7 +132,7 @@ def count_distribution(ds, index_range, step=1):
 
     x = np.zeros(index_range)
     for value in ds:
-        value_index = int(value / step)
+        value_index = int(value * scale / step)
         x[value_index] += 1
     return x
 
@@ -139,6 +142,24 @@ def calculate_windows_average(ds, length):
     for pos in range(len(ds) - length):
         av = np.average(ds[pos:pos + length])
         x.append(av)
+    return x
+
+
+def count_words(ds):
+    counter = {}
+    for w in ds:
+        if w in counter.keys():
+            counter[w] += 1
+        else:
+            counter[w] = 1
+    return sorted(counter.items(), key=lambda x: x[1])
+
+
+def calculate_windows_sum(ds, length):
+    x = []
+    for pos in range(len(ds) - length):
+        sv = np.sum(ds[pos:pos + length])
+        x.append(sv)
     return x
 
 

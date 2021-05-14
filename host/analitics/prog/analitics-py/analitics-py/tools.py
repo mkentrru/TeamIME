@@ -41,13 +41,28 @@ class Data:
         self.pds = np.array((self.ods['Temp'], self.ods['Power']))
 
 
-def plot_series(series, cuts_position, cuts_length, cuts_count):
+def prepare_dataset(ds, cut_pos, cut_length, mode):
+    if mode == 'diff':
+        x = np.zeros(cut_length)
+        for pos in range(1, cut_length):
+            x[pos] -= ds[cut_pos + pos - 1] - ds[cut_pos + pos]
+        return x
+    if mode == 'cut':
+        x = ds[cut_pos: cut_pos + cut_length].copy()
+        return x
+
+
+def plot_series(series, cuts_position, cuts_length, cuts_count, vline_space=None):
     plot_config = cuts_count * 100 + 11
     plt.figure(figsize=(8, cuts_count * 3))
 
     for i in range(cuts_count):
         plt.subplot(plot_config)
         plot_config += 1
+        if vline_space is not None:
+            for x in range(cuts_position, cuts_position + cuts_length, vline_space):
+                plt.axvline(x=x)
+
         plt.plot(
             range(cuts_position, cuts_position + cuts_length),
             series[cuts_position: cuts_position + cuts_length: 1],
@@ -94,7 +109,8 @@ def parse_data(subdir, name, write=False):
         # time_value = time.strptime(string_values[0], '%H:%M:%S.%f')
         # timestamp = int(time.mktime(time_value))
         # print(timestamp)
-        arr.append((string_values[0], string_values[2], string_values[3][:-1]))
+        # print(string_values)
+        arr.append((string_values[0], string_values[1][:-1]))
 
     # print(arr)
 
