@@ -52,7 +52,7 @@ def prepare_dataset(ds, cut_pos, cut_length, mode):
         return x
 
 
-def plot_series(series, cuts_position, cuts_length, cuts_count, vline_space=None):
+def plot_series(series, cuts_position, cuts_length, cuts_count=1, vline_space=None, move=True):
     plot_config = cuts_count * 100 + 11
     plt.figure(figsize=(8, cuts_count * 3))
 
@@ -61,13 +61,20 @@ def plot_series(series, cuts_position, cuts_length, cuts_count, vline_space=None
         plot_config += 1
         if vline_space is not None:
             for x in range(cuts_position, cuts_position + cuts_length, vline_space):
-                plt.axvline(x=x)
+                plt.axvline(x=x, ls='--', lw=0.5, color=(0.1, 0.5, 0.1))
 
+        if move:
+            x = range(cuts_position, cuts_position + cuts_length)
+        else:
+            x = range(0, cuts_length)
         plt.plot(
-            range(cuts_position, cuts_position + cuts_length),
+            x,
             series[cuts_position: cuts_position + cuts_length: 1],
             linewidth=1.0)
+
         cuts_position += cuts_length
+
+
 
 
 def bar_series(series):

@@ -2,54 +2,58 @@ import tools as t
 import classifier as c
 import configuration as conf
 import analitics as a
-
+import numpy as np
 
 if __name__ == '__main__':
     normal = t.Data(conf.path, conf.data_set_type)
     normal.add_dataset_from_file('r2/normal/', 'normal', 'csv')
 
-    # t.plot_series(normal.ods['Power'], 0, 30000, 1)
-    # t.plot_series(normal.ods['Temp'], 0, 30000, 1)
+    timeout = t.Data(conf.path, conf.data_set_type)
+    timeout.add_dataset_from_file('r2/normal/', 'timeout', 'csv')
 
-    ds_cut_pos = 0
-    ds_cut_length = 30000
+    ds_sizes = 5000
+    ds_pos = 0
+    ds_power = []
+    ds_power = np.append(ds_power,
+                         t.prepare_dataset(normal.ods['Power'], ds_pos, ds_sizes, 'cut'))
+    ds_power = np.append(ds_power,
+                         t.prepare_dataset(timeout.ods['Power'], ds_pos, ds_sizes, 'cut'))
 
-    ds_power = t.prepare_dataset(normal.ods['Power'],
-                                 ds_cut_pos, ds_cut_length, 'cut')
-    ds_temperature = t.prepare_dataset(normal.ods['Temp'],
-                                       ds_cut_pos, ds_cut_length, 'diff')
+    ds_temperature = []
+    ds_temperature = np.append(ds_temperature,
+                               t.prepare_dataset(normal.ods['Temp'], ds_pos, ds_sizes, 'diff'))
+    ds_temperature = np.append(ds_temperature,
+                               t.prepare_dataset(timeout.ods['Temp'], ds_pos, ds_sizes, 'diff'))
+
+    # t.plot_series(ds_power, 0, len(ds_power))
+    # t.plot_series(ds_temperature, 0, len(ds_temperature))
+    #
+    # t.show_all_plots()
 
     CT = c.ClassificationTools(ds_power, ds_temperature)
 
-    tmp_size = 29000
+    CT.define_power_classes()
+    CT.define_temp_classes()
 
-    t.plot_series(normal.ods['Power'], 0, tmp_size, 1, 100)
-    t.plot_series(normal.ods['Temp'], 0, tmp_size, 1, 100)
-
-    CT.define_power_classes(0, tmp_size, 1)  # !!!
-    CT.define_temp_classes(0, tmp_size, 1)
-
-    classified_series = CT.apply_classes(0, tmp_size)
+    classified_series = CT.apply_classes()
 
     print(classified_series)
     print(a.count_words(classified_series))
 
     CA = c.ClassesAnalytics(classified_series)
 
-    CA.count_followings()
+    CA.find_collections(classified_series, 6)
 
-    # t.show_all_plots()
+    val_pos = 5000
+    val_size = 10000
 
-    # class_preprocessed = c.ClassifierPreprocessing(n_bins=4, word_size=2)
-    #
-    # # coefs = class_prepr.apply_transformation(pure_data.ods['Voltage'], 0, 500, 5)
-    # # print(len(class_prepr.get_vocabulary()), ': ', class_prepr.get_vocabulary().values())
-    # # print(coefs)
-    # #
-    # t.plot_series(pure_data.ods['Voltage'], 0, 200, 5)
-    # t.show_all_plots()
-    # # t.bar_series(coefs.toarray())
-    #
-    # class_learn = c.ClassifierLearning(conf.classifier_set_type)
-    # class_learn.pick_learning_dataset(pure_data.ods, 'Voltage',
-    #                                   0, 500, 250, 10000000, class_preprocessed)
+    val_power = []
+    val_power = np.append(val_power,
+                          t.prepare_dataset(normal.ods['Power'], val_pos, val_size, 'cut'))
+
+    val_temperature = []
+    val_temperature = np.append(val_temperature,
+                                t.prepare_dataset(normal.ods['Temp'], val_pos, val_size, 'diff'))
+
+
+
